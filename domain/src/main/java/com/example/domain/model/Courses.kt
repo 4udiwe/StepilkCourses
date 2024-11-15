@@ -45,7 +45,7 @@ data class Courses(
     var isIdeaCompatible: Boolean? = null,
     var isInWishlist: Boolean? = null,
     var lastStep: String? = null,
-    var introVideo: String? = null,
+    var introVideo: IntroVideo? = null,
     var socialProviders: ArrayList<String> = arrayListOf(),
     var authors: ArrayList<Int> = arrayListOf(),
     var tags: ArrayList<Int> = arrayListOf(),
