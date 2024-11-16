@@ -63,6 +63,8 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)

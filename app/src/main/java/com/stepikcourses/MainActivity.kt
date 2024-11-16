@@ -1,6 +1,7 @@
 package com.stepikcourses
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,28 +17,17 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.LifecycleOwner
 import com.stepikcourses.ui.theme.StepikCoursesTheme
 import com.stepikcourses.viewmodel.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.domain.model.Courses
+import com.stepikcourses.ui.screens.CourseScreen
 import com.stepikcourses.ui.screens.MainScreen
 import kotlinx.serialization.Serializable
 
@@ -46,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel by viewModel<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.getCourses()
         enableEdgeToEdge()
         setContent {
             StepikCoursesTheme {
@@ -77,8 +68,22 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavHost(startDestination = ScreenHome, navController = navController){
                         composable<ScreenHome> {
-                            MainScreen(viewModel = viewModel, innerPadding = innerPadding)
+                            MainScreen(
+                                viewModel = viewModel,
+                                innerPadding = innerPadding,
+                                onCourseClick = {
+                                    Log.d("RRR", "onCourse Clicked")
+                                    navController.navigate(ScreenCourse)
+                                }
+                            )
 
+                        }
+                        composable<ScreenCourse> {
+                            CourseScreen(
+                                course = viewModel.currentCourse
+                            ) {
+                                navController.popBackStack()
+                            }
                         }
                         composable<ScreenFavorite> {
 
@@ -99,5 +104,6 @@ object ScreenHome
 object ScreenFavorite
 @Serializable
 object ScreenUser
-
+@Serializable
+object ScreenCourse
 

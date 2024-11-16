@@ -17,7 +17,9 @@ class MainViewModel(
     private val _innerCourses = MutableStateFlow<List<Courses>>(emptyList())
     val courses = _innerCourses.asStateFlow()
 
-    private var page = 2
+    lateinit var currentCourse: Courses
+
+    private var page = 3
 
     fun getCourses() = viewModelScope.launch {
         val currentCourses = _innerCourses.value.toMutableList()
