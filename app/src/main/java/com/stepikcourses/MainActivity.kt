@@ -1,5 +1,7 @@
 package com.stepikcourses
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -90,6 +92,11 @@ class MainActivity : ComponentActivity() {
                                 course = viewModel.currentCourse,
                                 onBackClicked = { navController.popBackStack() },
                                 viewModel = viewModel,
+                                onGoToPlatformClicked = { course ->
+                                    val urlIntent = Intent(Intent.ACTION_VIEW)
+                                    urlIntent.data = Uri.parse(course.canonicalUrl)
+                                    startActivity(urlIntent)
+                                },
                                 innerPadding = innerPadding
                             )
                         }

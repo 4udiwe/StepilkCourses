@@ -1,5 +1,7 @@
 package com.stepikcourses.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -52,6 +54,7 @@ import com.stepikcourses.viewmodel.MainViewModel
 fun CourseScreen(
     course: Course,
     onBackClicked: () -> Unit,
+    onGoToPlatformClicked: (course: Course) -> Unit,
     viewModel: MainViewModel,
     innerPadding: PaddingValues
 
@@ -216,7 +219,9 @@ fun CourseScreen(
                     containerColor = colorResource(id = R.color.elements),
                     contentColor = Color.White
                 ),
-                onClick = { /*TODO*/ }
+                onClick = {
+                    onGoToPlatformClicked(course)
+                }
             ) {
                 Text(text = "Перейти на платформу")
             }
