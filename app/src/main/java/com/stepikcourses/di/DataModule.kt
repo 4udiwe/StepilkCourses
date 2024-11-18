@@ -1,6 +1,9 @@
 package com.stepikcourses.di
 
-import com.example.data.api.StepikApi
+import androidx.room.Room
+import com.example.data.remote.api.StepikApi
+import com.example.data.database.CourseDao
+import com.example.data.database.CourseDataBase
 import com.example.data.repository.CoursesRepositoryImpl
 import com.example.domain.repository.CoursesRepository
 import okhttp3.OkHttpClient
@@ -12,15 +15,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 val dataModule = module {
 
     factory<CoursesRepository> {
-        CoursesRepositoryImpl(api = get())
+        CoursesRepositoryImpl(api = get(), dao = get())
     }
 
     single<StepikApi> {
-        val interseptor = HttpLoggingInterceptor()
-        interseptor.level = HttpLoggingInterceptor.Level.BODY
+        val interсeptor = HttpLoggingInterceptor()
+        interсeptor.level = HttpLoggingInterceptor.Level.BODY
 
         val client = OkHttpClient.Builder()
-            .addInterceptor(interseptor)
+            .addInterceptor(interсeptor)
             .build()
 
         Retrofit.Builder()
@@ -29,5 +32,18 @@ val dataModule = module {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(StepikApi::class.java)
+    }
+
+    single<CourseDataBase> {
+        Room.databaseBuilder(
+            context = get(),
+            CourseDataBase::class.java,
+            "courses.db"
+        ).build()
+    }
+
+    single <CourseDao>{
+        val db = get<CourseDataBase>()
+        db.courseDao()
     }
 }

@@ -1,7 +1,7 @@
 package com.example.domain.model
 
 
-data class Courses(
+data class Course(
 
     var id: Int? = null,
     var summary: String? = null,

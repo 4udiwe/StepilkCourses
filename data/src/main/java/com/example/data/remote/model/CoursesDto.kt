@@ -1,7 +1,7 @@
-package com.example.data.model
+package com.example.data.remote.model
 
-import com.example.domain.model.CanBeDeleted
-import com.example.domain.model.Courses
+
+import com.example.domain.model.Course
 import com.google.gson.annotations.SerializedName
 
 
@@ -142,7 +142,7 @@ data class CoursesDto(
     @SerializedName("lti_private_profile") var ltiPrivateProfile: Boolean? = null
 
 ) {
-    fun mapDomain() = Courses(
+    fun mapDomain() = Course(
         id,
         summary,
         workload,

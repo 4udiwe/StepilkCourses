@@ -6,6 +6,11 @@ import org.koin.dsl.module
 
 val appModule = module {
     viewModel<MainViewModel> {
-        MainViewModel(getCourseUseCase = get())
+        MainViewModel(
+            getCourseUseCase = get(),
+            addFavoriteCourseUseCase = get(),
+            deleteFavoriteUseCase = get(),
+            getFavoriveCoursesUseCase = get()
+        )
     }
 }

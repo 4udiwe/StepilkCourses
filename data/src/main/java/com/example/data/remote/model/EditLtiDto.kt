@@ -1,4 +1,5 @@
-package com.example.data.model
+package com.example.data.remote.model
+
 
 import com.example.domain.model.EditLti
 import com.google.gson.annotations.SerializedName

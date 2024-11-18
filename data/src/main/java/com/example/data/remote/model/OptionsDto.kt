@@ -1,8 +1,7 @@
-package com.example.data.model
+package com.example.data.remote.model
 
 import com.example.domain.model.Options
 import com.google.gson.annotations.SerializedName
-
 
 data class OptionsDto(
     @SerializedName("option") var option: String? = null

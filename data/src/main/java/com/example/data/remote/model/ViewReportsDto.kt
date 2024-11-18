@@ -1,14 +1,13 @@
-package com.example.data.model
+package com.example.data.remote.model
 
-import com.example.domain.model.ViewGradeBookPage
+import com.example.domain.model.ViewReports
 import com.google.gson.annotations.SerializedName
 
-
-data class ViewGradeBookPageDto (
+data class ViewReportsDto (
 
   @SerializedName("enabled"          ) var enabled         : Boolean? = null,
   @SerializedName("needs_permission" ) var needsPermission : String?  = null
 
 ) {
-  fun mapDomain() = ViewGradeBookPage(enabled, needsPermission)
+  fun mapDomain() = ViewReports(enabled, needsPermission)
 }

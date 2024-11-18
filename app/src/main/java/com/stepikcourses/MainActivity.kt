@@ -28,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stepikcourses.ui.screens.CourseScreen
+import com.stepikcourses.ui.screens.FavoriteScreen
 import com.stepikcourses.ui.screens.MainScreen
 import kotlinx.serialization.Serializable
 
@@ -72,7 +73,6 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 innerPadding = innerPadding,
                                 onCourseClick = {
-                                    Log.d("RRR", "onCourse Clicked")
                                     navController.navigate(ScreenCourse)
                                 }
                             )
@@ -86,7 +86,13 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable<ScreenFavorite> {
-
+                            FavoriteScreen(
+                                viewModel = viewModel,
+                                innerPadding = innerPadding,
+                                onCourseClick = {
+                                    navController.navigate(ScreenCourse)
+                                }
+                            )
                         }
                         composable<ScreenUser> {
 

@@ -1,14 +1,14 @@
-package com.example.data.model
+package com.example.data.remote.model
 
-import com.example.domain.model.ViewReports
+import com.example.domain.model.EditAdvancedSettings
 import com.google.gson.annotations.SerializedName
 
 
-data class ViewReportsDto (
+data class EditAdvancedSettingsDto (
 
   @SerializedName("enabled"          ) var enabled         : Boolean? = null,
   @SerializedName("needs_permission" ) var needsPermission : String?  = null
 
-) {
-  fun mapDomain() = ViewReports(enabled, needsPermission)
+){
+  fun mapDomain() = EditAdvancedSettings(enabled, needsPermission)
 }
