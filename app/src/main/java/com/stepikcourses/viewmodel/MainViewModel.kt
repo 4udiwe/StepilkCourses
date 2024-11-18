@@ -1,6 +1,5 @@
 package com.stepikcourses.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.entity.CourseModel
@@ -17,7 +16,7 @@ class MainViewModel(
     private val getCourseUseCase: GetCourseUseCase,
     private val addFavoriteCourseUseCase: AddFavoriteCourseUseCase,
     private val deleteFavoriteUseCase: DeleteFavoriteUseCase,
-    getFavoriveCoursesUseCase: GetFavoriveCoursesUseCase
+    getFavoriteCoursesUseCase: GetFavoriveCoursesUseCase
 ) : ViewModel() {
 
     private val _innerCourses = MutableStateFlow<List<Course>>(emptyList())
@@ -27,18 +26,19 @@ class MainViewModel(
 
     private var page = 3
 
-    val favoriteCourses = getFavoriveCoursesUseCase.invoke()
+    val favoriteCourses = getFavoriteCoursesUseCase.invoke()
 
     fun getCourses() = viewModelScope.launch {
         val currentCourses = _innerCourses.value.toMutableList()
-        val coursesInfo = getCourseUseCase.invoke(page)
-
-
-        if (coursesInfo.meta?.hasNext == true) {
-            currentCourses.addAll(coursesInfo.courses)
-            page++
+        repeat(3){
+            val coursesInfo = getCourseUseCase.invoke(page)
+            if (coursesInfo.meta?.hasNext == true) {
+                currentCourses.addAll(coursesInfo.courses)
+                page++
+            }
             _innerCourses.value = currentCourses
         }
+
     }
 
     fun addFavorite(course: Course) = viewModelScope.launch {

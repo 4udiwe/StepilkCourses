@@ -10,7 +10,7 @@ val appModule = module {
             getCourseUseCase = get(),
             addFavoriteCourseUseCase = get(),
             deleteFavoriteUseCase = get(),
-            getFavoriveCoursesUseCase = get()
+            getFavoriteCoursesUseCase = get()
         )
     }
 }

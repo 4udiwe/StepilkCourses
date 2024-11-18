@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stepikcourses.ui.screens.CourseScreen
 import com.stepikcourses.ui.screens.FavoriteScreen
 import com.stepikcourses.ui.screens.MainScreen
+import com.stepikcourses.ui.screens.UserScreen
 import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
@@ -102,7 +103,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable<ScreenUser> {
-
+                            UserScreen(
+                                viewModel = viewModel,
+                                innerPadding = innerPadding,
+                                onCourseClick = {
+                                    navController.navigate(ScreenCourse)
+                                }
+                            )
                         }
                     }
                 }
