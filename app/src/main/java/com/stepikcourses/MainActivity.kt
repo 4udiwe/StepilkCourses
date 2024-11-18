@@ -56,18 +56,24 @@ class MainActivity : ComponentActivity() {
                             IconButton(onClick = {
                                 navController.navigate(ScreenFavorite)
                             }) {
-                                Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "favorite")
+                                Icon(
+                                    imageVector = Icons.Default.FavoriteBorder,
+                                    contentDescription = "favorite"
+                                )
                             }
                             IconButton(onClick = {
                                 navController.navigate(ScreenUser)
                             }) {
-                                Icon(imageVector = Icons.TwoTone.Person, contentDescription = "home")
+                                Icon(
+                                    imageVector = Icons.TwoTone.Person,
+                                    contentDescription = "home"
+                                )
                             }
 
                         }
                     }
                 ) { innerPadding ->
-                    NavHost(startDestination = ScreenHome, navController = navController){
+                    NavHost(startDestination = ScreenHome, navController = navController) {
                         composable<ScreenHome> {
                             MainScreen(
                                 viewModel = viewModel,
@@ -80,10 +86,11 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<ScreenCourse> {
                             CourseScreen(
-                                course = viewModel.currentCourse
-                            ) {
-                                navController.popBackStack()
-                            }
+                                course = viewModel.currentCourse,
+                                onBackClicked = { navController.popBackStack() },
+                                viewModel = viewModel,
+                                innerPadding = innerPadding
+                            )
                         }
                         composable<ScreenFavorite> {
                             FavoriteScreen(
@@ -106,10 +113,13 @@ class MainActivity : ComponentActivity() {
 
 @Serializable
 object ScreenHome
+
 @Serializable
 object ScreenFavorite
+
 @Serializable
 object ScreenUser
+
 @Serializable
 object ScreenCourse
 

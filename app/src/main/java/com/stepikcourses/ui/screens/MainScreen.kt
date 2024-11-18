@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.domain.entity.CourseModel
 import com.example.domain.model.Course
 import com.stepikcourses.R
 import com.stepikcourses.viewmodel.MainViewModel
@@ -63,8 +64,7 @@ fun MainScreen(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.background))
             .padding(innerPadding)
-            .padding(horizontal = 4.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -124,8 +124,9 @@ fun MainScreen(
         }
         val favCourses = viewModel.favoriteCourses.collectAsState(initial = emptyList()).value
         LazyColumn {
-            items(coursesState.value) { course->
-                course.isFavorite = favCourses.find { courseModel -> courseModel.id == course.id } != null
+            items(coursesState.value) { course ->
+                course.isFavorite =
+                    favCourses.find { courseModel -> courseModel.id == course.id } != null
 
                 CourseSheet(
                     course = course,
@@ -200,6 +201,7 @@ fun CourseSheet(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(top = 10.dp, end = 10.dp),
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xB2464646)),
                         onClick = {
                             if (course.isFavorite == true)
                                 onDeleteFav.invoke()
@@ -207,13 +209,17 @@ fun CourseSheet(
                                 onAddFav.invoke()
                         }
                     ) {
-                        Icon(
-                            imageVector =
-                            if (course.isFavorite == true)
-                                Icons.Default.Favorite
-                            else Icons.Default.FavoriteBorder,
-                            contentDescription = "favorite"
-                        )
+                        if (course.isFavorite == true)
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                tint = colorResource(R.color.green),
+                                contentDescription = "favorite"
+                            )
+                        else
+                            Icon(
+                                imageVector = Icons.Default.FavoriteBorder,
+                                contentDescription = "favorite"
+                            )
                     }
 
                     Row(

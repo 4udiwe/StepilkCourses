@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -27,6 +30,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,42 +41,41 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.htmlEncode
+import coil.compose.AsyncImage
+import com.example.domain.entity.CourseModel
 import com.example.domain.model.Course
 import com.stepikcourses.R
+import com.stepikcourses.viewmodel.MainViewModel
 
 
 @Composable
 fun CourseScreen(
-    course: Course = Course(
-        title = "Course title - asdfasd",
-        description = "desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion ",
-        price = "12 000",
-        becamePublishedAt = "22 Мая 2024",
-        isFavorite = false
-    ),
-    onBackClicked: () -> Unit
+    course: Course,
+    onBackClicked: () -> Unit,
+    viewModel: MainViewModel,
+    innerPadding: PaddingValues
+
 ) {
+    val isFav = remember { mutableStateOf(course.isFavorite) }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.background))
-            .scrollable(
-                state = rememberScrollState(),
-                orientation = Orientation.Vertical
-            ),
+            .padding(bottom = innerPadding.calculateBottomPadding())
+            .verticalScroll(rememberScrollState())
     ) {
-        Box(modifier = Modifier.fillMaxWidth()){
-            Image(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp),
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "123",
+                model = course.cover,
+                contentDescription = "cover",
                 contentScale = ContentScale.Crop
             )
             IconButton(
-                modifier = Modifier.padding(16.dp),
-                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White),
+                modifier = Modifier.padding(innerPadding).padding(16.dp),
+                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White, contentColor = Color.Black),
                 onClick = {
                     onBackClicked.invoke()
                 }
@@ -85,14 +89,34 @@ fun CourseScreen(
             IconButton(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .padding(innerPadding)
                     .padding(16.dp),
-                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White),
-                onClick = { /*TODO*/ }
+                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White, contentColor = Color.Black),
+                onClick = {
+                    if (course.isFavorite == true) {
+                        course.isFavorite = false
+                        isFav.value = false
+                        viewModel.deleteFavorite(course)
+                    } else {
+                        course.isFavorite = true
+                        isFav.value = true
+                        viewModel.addFavorite(course)
+                    }
+                }
             ) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "back"
-                )
+                if (isFav.value == true) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        tint = colorResource(R.color.green),
+                        contentDescription = "favorite"
+                    )
+                } else {
+                    course.isFavorite = true
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "favorite"
+                    )
+                }
             }
             Row(
                 modifier = Modifier
@@ -129,8 +153,31 @@ fun CourseScreen(
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.Bottom
                     ) {
+                        val pubDate = course.becamePublishedAt
+                        val month = when (pubDate?.substring(5, 7)) {
+                            "01" -> "Января"
+                            "02" -> "Февраля"
+                            "03" -> "Марта"
+                            "04" -> "Апреля"
+                            "05" -> "Майя"
+                            "06" -> "Июня"
+                            "07" -> "Июля"
+                            "08" -> "Августа"
+                            "09" -> "Сентября"
+                            "10" -> "Октября"
+                            "11" -> "Ноября"
+                            "12" -> "Декабря"
+                            else -> {
+                                ""
+                            }
+                        }
                         Text(
-                            text = course.becamePublishedAt.toString(),
+                            text = "${
+                                pubDate?.substring(
+                                    8,
+                                    10
+                                )
+                            } $month ${pubDate?.take(4)}",
                             color = Color.White
                         )
                     }
@@ -138,11 +185,11 @@ fun CourseScreen(
             }
         }
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-        ){
+        ) {
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = course.title.toString(),
@@ -150,21 +197,14 @@ fun CourseScreen(
                 color = Color.White
             )
 
-            Row {
-                //автор icon
-                Image(
-                    modifier = Modifier.size(60.dp),
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "author"
-                )
-                Column {
-                    Text(text = "Автор", color = Color.White)
+            Text(text = course.summary ?: "Course Summary")
 
-                }
-            }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.green),
+                    contentColor = Color.White
+                ),
                 onClick = { /*TODO*/ }
             ) {
                 Text(text = "Начать курс")
@@ -172,17 +212,31 @@ fun CourseScreen(
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.elements)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.elements),
+                    contentColor = Color.White
+                ),
                 onClick = { /*TODO*/ }
             ) {
                 Text(text = "Перейти на платформу")
             }
 
-            Text(modifier = Modifier.padding(bottom = 4.dp, top = 16.dp), text = "О курсе", color = Color.White, fontSize = 22.sp)
-            Text(text = course.description.toString().htmlEncode(), color = Color.Gray)
+            Text(
+                modifier = Modifier.padding(bottom = 4.dp, top = 16.dp),
+                text = "О курсе",
+                color = Color.White,
+                fontSize = 22.sp
+            )
+            Text(text = course.description.toString(), color = Color.Gray)
+            Text(text = "Сложность: ${course.difficulty ?: "course difficulty"}")
 
-            if(course.price != null)
-                Text(modifier = Modifier.padding(bottom = 4.dp, top = 16.dp), text = "Цена ${course.price} ₽", color = Color.White, fontSize = 22.sp)
+            if (course.price != null)
+                Text(
+                    modifier = Modifier.padding(bottom = 4.dp, top = 16.dp),
+                    text = "Цена ${course.price} ₽",
+                    color = Color.White,
+                    fontSize = 22.sp
+                )
 
         }
 
