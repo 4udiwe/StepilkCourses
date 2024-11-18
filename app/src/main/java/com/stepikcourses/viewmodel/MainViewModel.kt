@@ -10,6 +10,8 @@ import com.example.domain.usecase.GetCourseUseCase
 import com.example.domain.usecase.GetFavoriveCoursesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 
 class MainViewModel(
@@ -27,6 +29,8 @@ class MainViewModel(
     private var page = 3
 
     val favoriteCourses = getFavoriteCoursesUseCase.invoke()
+
+    var sortingType = SortingType.DATE
 
     fun getCourses() = viewModelScope.launch {
         val currentCourses = _innerCourses.value.toMutableList()
@@ -68,4 +72,7 @@ class MainViewModel(
         )
         deleteFavoriteUseCase.invoke(model)
     }
+}
+enum class SortingType {
+    DATE, POPULARITY, RAINING
 }

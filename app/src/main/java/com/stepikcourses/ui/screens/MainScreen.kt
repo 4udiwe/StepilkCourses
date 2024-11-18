@@ -1,6 +1,8 @@
 package com.stepikcourses.ui.screens
 
+import android.widget.RadioGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,46 +24,57 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.room.util.TableInfo
 import coil.compose.AsyncImage
-import com.example.domain.entity.CourseModel
 import com.example.domain.model.Course
 import com.stepikcourses.R
 import com.stepikcourses.viewmodel.MainViewModel
-import kotlinx.coroutines.Job
+import com.stepikcourses.viewmodel.SortingType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
-    innerPadding: PaddingValues,
-    onCourseClick: () -> Unit
+    viewModel: MainViewModel, innerPadding: PaddingValues, onCourseClick: () -> Unit
 ) {
 
     val coursesState = viewModel.courses.collectAsState()
+    val sortingDialogState = remember { mutableStateOf(false) }
+
+    if (sortingDialogState.value)
+        SortingDialog(viewModel = viewModel, dialogState = sortingDialogState)
+
     Column(
         Modifier
             .fillMaxSize()
@@ -92,11 +105,9 @@ fun MainScreen(
                 },
                 colors = SearchBarDefaults.colors(containerColor = colorResource(id = R.color.elements))
             ) {}
-            IconButton(
-                modifier = Modifier.size(58.dp),
+            IconButton(modifier = Modifier.size(58.dp),
                 colors = IconButtonDefaults.iconButtonColors(containerColor = colorResource(id = R.color.elements)),
-                onClick = { /*TODO*/ }
-            ) {
+                onClick = { /*TODO*/ }) {
                 Icon(
                     imageVector = Icons.Default.List,
                     contentDescription = "filter",
@@ -104,47 +115,49 @@ fun MainScreen(
                 )
             }
         }
-        TextButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            onClick = { /*TODO*/ }
-        ) {
+        TextButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp), onClick = { /*TODO*/ }) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().clickable {
+                    sortingDialogState.value = true
+                },
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Сортировка", color = colorResource(id = R.color.green))
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = "123",
-                    tint = colorResource(id = R.color.green)
-                )
+                Text(text = "По ${
+                    when (viewModel.sortingType) {
+                        SortingType.DATE -> "дате публикации"
+                        SortingType.POPULARITY -> "популярности"
+                        SortingType.RAINING -> "рейтингу"
+                    }
+                }", color = colorResource(id = R.color.green))
             }
 
 
         }
         val favCourses = viewModel.favoriteCourses.collectAsState(initial = emptyList()).value
         LazyColumn {
-            items(coursesState.value) { course ->
+            items(coursesState.value.sortedBy { course ->
+                when (viewModel.sortingType) {
+                    SortingType.DATE -> course.becamePublishedAt
+                    SortingType.POPULARITY -> course.isPopular
+                    SortingType.RAINING -> course.becamePublishedAt
+                }.toString()
+            }
+            ) { course ->
                 course.isFavorite =
                     favCourses.find { courseModel -> courseModel.id == course.id } != null
 
-                CourseSheet(
-                    course = course,
-                    onDetailsClick = {
-                        viewModel.currentCourse = course
-                        onCourseClick.invoke()
-                    },
-                    onAddFav = {
-                        course.isFavorite = true
-                        viewModel.addFavorite(course)
-                    },
-                    onDeleteFav = {
-                        viewModel.deleteFavorite(course)
-                    }
-                )
+                CourseSheet(course = course, onDetailsClick = {
+                    viewModel.currentCourse = course
+                    onCourseClick.invoke()
+                }, onAddFav = {
+                    course.isFavorite = true
+                    viewModel.addFavorite(course)
+                }, onDeleteFav = {
+                    viewModel.deleteFavorite(course)
+                })
             }
             item {
                 val isLoading = remember { mutableStateOf(false) }
@@ -153,7 +166,7 @@ fun MainScreen(
                     modifier = Modifier.fillParentMaxWidth(),
                     onClick = {
                         val job = viewModel.getCourses()
-                        when (job.isActive){
+                        when (job.isActive) {
                             true -> isLoading.value = true
                             false -> isLoading.value = false
                         }
@@ -167,27 +180,16 @@ fun MainScreen(
     }
 }
 
-//@Preview(showSystemUi = true)
 @Composable
 fun CourseSheet(
-    course: Course = Course(
-        title = "Course title - asdfasd",
-        description = "desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion desctiprion ",
-        price = "12 000",
-        becamePublishedAt = "22 Мая 2024",
-        isFavorite = false
-    ),
-    onDetailsClick: () -> Unit,
-    onAddFav: () -> Unit,
-    onDeleteFav: () -> Unit
+    course: Course, onDetailsClick: () -> Unit, onAddFav: () -> Unit, onDeleteFav: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(id = R.color.elements),
-            contentColor = Color.White
+            containerColor = colorResource(id = R.color.elements), contentColor = Color.White
         )
     ) {
         Column(
@@ -206,29 +208,27 @@ fun CourseSheet(
                         contentDescription = null,
                         contentScale = ContentScale.FillWidth
                     )
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 10.dp, end = 10.dp),
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xB2464646)),
+                    IconButton(modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 10.dp, end = 10.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color(
+                                0xB2464646
+                            )
+                        ),
                         onClick = {
-                            if (course.isFavorite == true)
-                                onDeleteFav.invoke()
-                            else
-                                onAddFav.invoke()
-                        }
-                    ) {
-                        if (course.isFavorite == true)
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                tint = colorResource(R.color.green),
-                                contentDescription = "favorite"
-                            )
-                        else
-                            Icon(
-                                imageVector = Icons.Default.FavoriteBorder,
-                                contentDescription = "favorite"
-                            )
+                            if (course.isFavorite == true) onDeleteFav.invoke()
+                            else onAddFav.invoke()
+                        }) {
+                        if (course.isFavorite == true) Icon(
+                            imageVector = Icons.Default.Favorite,
+                            tint = colorResource(R.color.green),
+                            contentDescription = "favorite"
+                        )
+                        else Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "favorite"
+                        )
                     }
 
                     Row(
@@ -287,11 +287,9 @@ fun CourseSheet(
                                 Text(
                                     text = "${
                                         pubDate?.substring(
-                                            8,
-                                            10
+                                            8, 10
                                         )
-                                    } $month ${pubDate?.take(4)}",
-                                    color = Color.White
+                                    } $month ${pubDate?.take(4)}", color = Color.White
                                 )
                             }
                         }
@@ -319,15 +317,15 @@ fun CourseSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (course.price != null)
-                        Text(text = "${course.price} ₽", fontWeight = FontWeight.Bold)
-                    else
-                        Text(text = "")
+                    if (course.price != null) Text(
+                        text = "${course.price} ₽",
+                        fontWeight = FontWeight.Bold
+                    )
+                    else Text(text = "")
                     TextButton(
                         onClick = {
                             onDetailsClick.invoke()
-                        },
-                        colors = ButtonDefaults.buttonColors(
+                        }, colors = ButtonDefaults.buttonColors(
                             contentColor = colorResource(id = R.color.green),
                             containerColor = Color.Transparent
                         )
@@ -343,4 +341,119 @@ fun CourseSheet(
         }
     }
 
+}
+
+
+@Composable
+fun SortingDialog(
+    viewModel: MainViewModel,
+    dialogState: MutableState<Boolean>
+) {
+
+    val datePicked = remember { mutableStateOf(viewModel.sortingType == SortingType.DATE) }
+    val rainingPicked = remember { mutableStateOf(viewModel.sortingType == SortingType.RAINING) }
+    val popularityPicked = remember { mutableStateOf(viewModel.sortingType == SortingType.POPULARITY) }
+
+    AlertDialog(
+        modifier = Modifier,
+        containerColor = colorResource(R.color.elements),
+        textContentColor = Color.White,
+        onDismissRequest = { dialogState.value = false },
+        dismissButton = {
+            TextButton(onClick = { dialogState.value = false }) {
+                Text("Назад")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                viewModel.sortingType =
+                    if (datePicked.value) SortingType.DATE
+                    else if (rainingPicked.value) SortingType.RAINING
+                    else SortingType.POPULARITY
+
+                dialogState.value = false
+            }) {
+                Text("Применить")
+            }
+        },
+        title = {
+            Text("Сортировать по...")
+        },
+        text = {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = datePicked.value,
+                        colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.green)),
+                        onClick = {
+                            datePicked.value = true
+                            rainingPicked.value = false
+                            popularityPicked.value = false
+                        }
+                    )
+                    Text(
+                        text = "Дате публикации",
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+                Divider()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = rainingPicked.value,
+                        colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.green)),
+                        onClick = {
+                            datePicked.value = false
+                            rainingPicked.value = true
+                            popularityPicked.value = false
+                        }
+                    )
+                    Text(
+                        text = "Рейтингу",
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+                Divider()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = popularityPicked.value,
+                        colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.green)),
+                        onClick = {
+                            datePicked.value = false
+                            rainingPicked.value = false
+                            popularityPicked.value = true
+                        }
+                    )
+                    Text(
+                        text = "Популярности",
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+        },
+
+        )
 }
