@@ -16,7 +16,7 @@ Kotlin, Jetpack Compose, Compose Navigation, Room, Firebase Auth, Retrofit, OkHt
 # Скриншоты приложения
 
 <details>
-  <summary>Матрица Эйзенхауэра</summary>
+  <summary>Скриншоты</summary>
 
 ![pic1](pictures/pic1.jpg)
 ![pic2](pictures/pic2.jpg)
