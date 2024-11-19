@@ -60,7 +60,7 @@ fun RegistrationScreen(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 16.dp),
             value = email.value,
-            onValueChange = {},
+            onValueChange = {email.value = it},
             label = { Text("example@gmail.com", fontSize = 20.sp, color = Color.Gray) },
             shape = RoundedCornerShape(60.dp),
             colors = TextFieldDefaults.colors(
@@ -77,7 +77,7 @@ fun RegistrationScreen(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 16.dp),
             value = password.value,
-            onValueChange = {},
+            onValueChange = {password.value = it},
             label = { Text("Введите пароль", fontSize = 20.sp, color = Color.Gray) },
             shape = RoundedCornerShape(60.dp),
             colors = TextFieldDefaults.colors(
@@ -94,7 +94,7 @@ fun RegistrationScreen(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 16.dp),
             value = copyPassword.value,
-            onValueChange = {},
+            onValueChange = {copyPassword.value = it},
             label = { Text("Введите пароль еще раз", fontSize = 20.sp, color = Color.Gray) },
             shape = RoundedCornerShape(60.dp),
             colors = TextFieldDefaults.colors(
@@ -108,9 +108,12 @@ fun RegistrationScreen(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                if (email.value.isEmpty() || password.value.isEmpty() || copyPassword.value.isEmpty())
+                if (email.value.isEmpty() || password.value.isEmpty() || copyPassword.value.isEmpty()) {
                     onFieldsEmpty.invoke()
-                else if(password.value != copyPassword.value)
+                    passwordError.value = password.value.isEmpty()
+                    emailError.value = email.value.isEmpty()
+                    copyPasswordError.value = copyPassword.value.isEmpty()
+                } else if(password.value != copyPassword.value)
                     onPasswordDismiss.invoke()
                 else
                     onRegistrate(email.value, password.value)

@@ -57,7 +57,7 @@ fun SignInScreen(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 16.dp),
             value = email.value,
-            onValueChange = {},
+            onValueChange = { email.value = it},
             label = { Text("example@gmail.com", fontSize = 20.sp, color = Color.Gray) },
             shape = RoundedCornerShape(60.dp),
             colors = TextFieldDefaults.colors(
@@ -74,7 +74,7 @@ fun SignInScreen(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 16.dp),
             value = password.value,
-            onValueChange = {},
+            onValueChange = {password.value = it},
             label = { Text("Введите пароль", fontSize = 20.sp, color = Color.Gray) },
             shape = RoundedCornerShape(60.dp),
             colors = TextFieldDefaults.colors(
@@ -88,8 +88,11 @@ fun SignInScreen(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                if (email.value.isEmpty() || password.value.isEmpty())
+                if (email.value.isEmpty() || password.value.isEmpty()) {
+                    passwordError.value = password.value.isEmpty()
+                    emailError.value = email.value.isEmpty()
                     onFieldsEmpty.invoke()
+                }
                 else
                     onSignIn(email.value, password.value)
             },

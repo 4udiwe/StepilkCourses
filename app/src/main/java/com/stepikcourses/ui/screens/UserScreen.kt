@@ -34,7 +34,8 @@ import com.stepikcourses.viewmodel.MainViewModel
 fun UserScreen(
     viewModel: MainViewModel,
     innerPadding: PaddingValues,
-    onCourseClick: () -> Unit
+    onCourseClick: () -> Unit,
+    onLogOut: () -> Unit
 ) {
     val favCourses = viewModel.favoriteCourses.collectAsState(initial = emptyList()).value.map {
         Course(
@@ -87,7 +88,10 @@ fun UserScreen(
                 }
                 Divider()
                 Row (
-                    modifier = Modifier.clickable {  }.fillMaxWidth().padding(vertical = 10.dp),
+                    modifier = Modifier.clickable {
+                        viewModel.logOut()
+                        onLogOut.invoke()
+                    }.fillMaxWidth().padding(vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
                     Text("Выйти из аккаунта")

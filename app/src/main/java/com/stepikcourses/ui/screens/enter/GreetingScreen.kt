@@ -27,7 +27,8 @@ import com.stepikcourses.R
 
 @Composable
 fun GreetingScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    onContinue: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -123,7 +124,9 @@ fun GreetingScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)
                 .align(Alignment.BottomCenter),
-            onClick = { TODO() },
+            onClick = {
+                onContinue.invoke()
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.green),
                 contentColor = Color.White
