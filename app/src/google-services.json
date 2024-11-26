@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "68130717853",
+    "project_id": "stepikcourses-85773",
+    "storage_bucket": "stepikcourses-85773.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68130717853:android:2b61bfeba3204dea349474",
+        "android_client_info": {
+          "package_name": "com.stepikcourses"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBx7xSfF_Z8TWdCB8cpGUW6hikdLtyj2Cg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
